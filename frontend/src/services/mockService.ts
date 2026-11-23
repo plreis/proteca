@@ -15,7 +15,7 @@ import {
   INITIAL_SCHOOL,
   INITIAL_SESSIONS,
 } from '@/data/fixtures';
-import { SchoolService } from './SchoolService';
+import { SchoolService } from './schoolService';
 
 class MockSchoolServiceImpl implements SchoolService {
   private school = { ...INITIAL_SCHOOL };

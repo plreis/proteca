@@ -1,25 +1,33 @@
-import {
-  AIAnalysis,
-  Classroom,
-  CreateIncidentDTO,
-  CreateSessionDTO,
-  Device,
-  Incident,
-  IncidentStatus,
-  LessonSession,
-} from '@/types';
+import { Classroom } from '@/types';
+import { authenticatedApiRequest } from './api';
 
-export interface SchoolService {
-  getSchool(): Promise<{ id: string; name: string; city: string }>;
-  getClassrooms(): Promise<Classroom[]>;
-  getDevices(): Promise<Device[]>;
-  getSessions(): Promise<LessonSession[]>;
-  getSession(id: string): Promise<LessonSession | null>;
-  createSession(dto: CreateSessionDTO): Promise<LessonSession>;
-  endSession(id: string, justification: string): Promise<LessonSession>;
-  getIncidents(filters?: { sessionId?: string; category?: string; status?: string }): Promise<Incident[]>;
-  getIncident(id: string): Promise<Incident | null>;
-  createIncident(dto: CreateIncidentDTO): Promise<Incident>;
-  updateIncidentStatus(id: string, status: IncidentStatus, justification?: string): Promise<Incident>;
-  requestAIAnalysis(sessionId: string): Promise<AIAnalysis>;
+interface SchoolResponse {
+  id: string;
+  name: string;
+  city: string;
 }
+
+interface ClassroomResponse {
+  id: string;
+  school_id: string;
+  name: string;
+  grade: string;
+}
+
+export const schoolService = {
+  getSchool(): Promise<SchoolResponse> {
+    return authenticatedApiRequest('/school');
+  },
+
+  async getClassrooms(): Promise<Classroom[]> {
+    const response =
+      await authenticatedApiRequest<ClassroomResponse[]>('/classrooms');
+
+    return response.map((classroom) => ({
+      id: classroom.id,
+      schoolId: classroom.school_id,
+      name: classroom.name,
+      grade: classroom.grade, 
+    }));
+  },
+};

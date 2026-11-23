@@ -87,7 +87,9 @@ export const IncidentForm: React.FC<IncidentFormProps> = ({ defaultSessionId, on
         onSuccess();
       } else {
         setTimeout(() => {
-          router.push(`/sessoes/${sessionId}`);
+          router.push(
+  `/sessoes/detalhe?id=${encodeURIComponent(sessionId)}`
+);
         }, 800);
       }
     } catch {

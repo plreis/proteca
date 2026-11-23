@@ -16,7 +16,8 @@ import { mockService } from '@/services/mockService';
 import {deviceService} from '@/services/dispositivoService';
 import { sessionService } from '@/services/sessionService';
 import { requestLiveGuidance as requestLiveGuidanceFromApi } from '@/services/liveGuidanceService';
-
+import { schoolService } from '@/services/schoolService';
+import { incidentService } from '@/services/incidentService'; 
 interface Notification {
   id: string;
   type: 'success' | 'info' | 'warning' | 'error';
@@ -39,7 +40,7 @@ interface SchoolContextValue {
   requestLiveGuidance: (sessionId: string) => Promise<LiveGuidance>;
   reloadState: () => Promise<void>;
 }
-
+ 
 const SchoolContext = createContext<SchoolContextValue | undefined>(undefined);
 
 export function SchoolProvider({ children }: { children: React.ReactNode }) {
@@ -64,11 +65,11 @@ export function SchoolProvider({ children }: { children: React.ReactNode }) {
 
   const reloadState = async () => {
     const [s, c, d, sess, inc] = await Promise.all([
-      mockService.getSchool(),
-      mockService.getClassrooms(),
+      schoolService.getSchool(),
+      schoolService.getClassrooms(),
       deviceService.getDevices(),
       sessionService.getSessions(),
-      mockService.getIncidents(),
+      incidentService.getIncidents(),
     ]);
     setSchool(s);
     setClassrooms(c);
@@ -96,7 +97,7 @@ export function SchoolProvider({ children }: { children: React.ReactNode }) {
   };
 
   const handleCreateIncident = async (dto: CreateIncidentDTO): Promise<Incident> => {
-    const created = await mockService.createIncident(dto);
+    const created = await incidentService.createIncident(dto);
     await reloadState();
     addNotification('success', `Ocorrência registrada com sucesso na sessão de aula.`);
     return created;
@@ -107,7 +108,7 @@ export function SchoolProvider({ children }: { children: React.ReactNode }) {
     status: IncidentStatus,
     justification?: string
   ): Promise<Incident> => {
-    const updated = await mockService.updateIncidentStatus(id, status, justification);
+    const updated = await incidentService.updateIncidentStatus(id, status, justification);
     await reloadState();
     const statusLabel =
       status === 'em_analise' ? 'Em Análise' : status === 'encerrada' ? 'Encerrada' : 'Aberta';

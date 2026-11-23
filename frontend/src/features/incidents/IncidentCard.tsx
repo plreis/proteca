@@ -89,7 +89,7 @@ export const IncidentCard: React.FC<IncidentCardProps> = ({ incident, showSessio
             Sessão: <strong className="text-slate-700">{session.objective}</strong>
           </span>
           <a
-            href={`/sessoes/${session.id}`}
+            href={`/sessoes/detalhe?id=${encodeURIComponent(session.id)}`}
             className="text-brand-action hover:underline font-medium"
           >
             Ver sessão →

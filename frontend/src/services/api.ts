@@ -44,6 +44,21 @@ function defineUrl(
   return url;
 }
 
+export function authenticatedApiRequest<T>(
+  path: string,
+  options: ApiRequestOptions = {}
+): Promise<T> {
+  const token =
+    typeof window !== 'undefined'
+      ? localStorage.getItem('proteca_token') ?? undefined
+      : undefined;
+
+  return apiRequest<T>(path, {
+    ...options,
+    token,
+  });
+}
+
 export async function apiRequest<T>(
   path: string,
   options: ApiRequestOptions = {}

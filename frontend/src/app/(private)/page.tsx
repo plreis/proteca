@@ -130,7 +130,7 @@ export default function DashboardPage() {
                 </p>
                 <div className="flex items-center justify-between pt-3 border-t border-slate-100">
                   <Link
-                    href={`/sessoes/${s.id}`}
+                    href={`/sessoes/detalhe?id=${encodeURIComponent(s.id)}`}
                     className="text-sm font-semibold text-brand-action hover:text-brand-action-hover"
                   >
                     Abrir Gestão da Sessão →
