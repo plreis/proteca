@@ -1,17 +1,5 @@
-import { apiRequest } from './api';
 import { LiveGuidance } from '@/types';
-
-interface LiveGuidanceRequest {
-  sessionId: string;
-  objective: string;
-  focus: {
-    activeDevices: number;
-    focusLostEvents: number;
-    safetyAlerts: number;
-    openIncidents: number;
-    elapsedMinutes: number;
-  };
-}
+import { authenticatedApiRequest } from './api';
 
 interface LiveGuidanceResponse {
   session_id: string;
@@ -26,22 +14,12 @@ interface LiveGuidanceResponse {
 }
 
 export async function requestLiveGuidance(
-  request: LiveGuidanceRequest
+  sessionId: string
 ): Promise<LiveGuidance> {
-  const data = await apiRequest<LiveGuidanceResponse>('/ia/live', {
-    method: 'POST',
-    body: {
-      session_id: request.sessionId,
-      objective: request.objective,
-      focus: {
-        active_devices: request.focus.activeDevices,
-        focus_lost_events: request.focus.focusLostEvents,
-        safety_alerts: request.focus.safetyAlerts,
-        open_incidents: request.focus.openIncidents,
-        elapsed_minutes: request.focus.elapsedMinutes,
-      },
-    },
-  });
+  const data = await authenticatedApiRequest<LiveGuidanceResponse>(
+    `/sessions/${encodeURIComponent(sessionId)}/live`,
+    { method: 'POST' }
+  );
 
   return {
     sessionId: data.session_id,

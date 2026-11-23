@@ -73,17 +73,6 @@ export interface Incident {
   actions: IncidentActionLog[];
 }
 
-export interface AIAnalysis {
-  sessionId: string;
-  generatedAt: string;
-  summary: string;
-  observedPatterns: string[];
-  pedagogicalRecommendations: string[];
-  limitations: string;
-  evidenceIncidentIds: string[];
-  isMock: boolean;
-}
-
 export type ProtecaState = 'acolhimento' | 'curiosidade' | 'alerta';
 
 export interface ProtecaIntervention {
