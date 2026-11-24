@@ -1,5 +1,7 @@
 // frontend/src/services/voiceService.ts
 
+import { redirectToLoginAfterExpiredSession } from './api';
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, '');
 
 export interface ProtecaVoice {
@@ -25,6 +27,9 @@ export async function requestProtecaVoice(text: string): Promise<ProtecaVoice> {
     body: JSON.stringify({ text }),
   });
 
+  if (response.status === 401) {
+    redirectToLoginAfterExpiredSession();
+  }
   if (!response.ok) {
     throw new Error(`Voz indisponível (status ${response.status}).`);
   }

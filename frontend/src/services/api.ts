@@ -83,6 +83,11 @@ export async function apiRequest<T>(
     ? await response.json()
     : await response.text();
 
+  // Token vencido ou inválido numa rota protegida: volta para o login em vez de deixar a tela com erro.
+  if (response.status === 401 && headers.has('Authorization')) {
+    redirectToLoginAfterExpiredSession();
+  }
+
   if (!response.ok) {
     const message =
       typeof responseBody === 'object' &&
@@ -96,4 +101,15 @@ export async function apiRequest<T>(
   }
 
   return responseBody as T;
+}
+
+export const EXPIRED_SESSION_PARAM = 'expirou';
+
+/** Apaga o token e leva ao login com o aviso de sessão expirada (recarrega o AuthContext). */
+export function redirectToLoginAfterExpiredSession(): void {
+  if (typeof window === 'undefined') return;
+  localStorage.removeItem('proteca_token');
+  if (!window.location.pathname.startsWith('/login')) {
+    window.location.replace(`/login/?${EXPIRED_SESSION_PARAM}=1`);
+  }
 }

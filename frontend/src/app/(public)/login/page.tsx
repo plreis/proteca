@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { authService } from '@/services/authService';
+import { EXPIRED_SESSION_PARAM } from '@/services/api';
 
 export default function LoginPage() {
     const { login } = useAuth();
@@ -12,6 +13,14 @@ export default function LoginPage() {
     const [senha, setSenha] = useState('');
     const [erro, setErro] = useState<string | null>(null);
     const [enviando, setEnviando] = useState(false);
+    const [aviso, setAviso] = useState<string | null>(null);
+
+    // Chegou aqui porque o token venceu (api.ts redireciona com ?expirou=1).
+    useEffect(() => {
+        if (new URLSearchParams(window.location.search).has(EXPIRED_SESSION_PARAM)) {
+            setAviso('Sua sessão expirou. Entre novamente para continuar.');
+        }
+    }, []);
 
     const handleLogin = async (event: React.FormEvent) => {
         event.preventDefault();
@@ -33,6 +42,11 @@ export default function LoginPage() {
         <div className="min-h-screen flex items-center justify-center bg-gray-100">
             <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
                 <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
+                {aviso && (
+                    <p role="status" className="mb-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-800">
+                        {aviso}
+                    </p>
+                )}
                 <form onSubmit={handleLogin} noValidate>
                     <div className="mb-4">
                         <label htmlFor="email" className="block text-gray-700 mb-2">Email</label>
