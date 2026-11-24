@@ -200,8 +200,14 @@ export default function SessionDetailClient({ sessionId }: SessionDetailClientPr
 
         {/* Coluna da Direita (1 col): IA Demo e Histórico da Sessão */}
         <div className="space-y-6">
-          {/* Card da IA Demonstrativa */}
-          <AIDemoCard sessionId={session.id} />
+          {/* Proteca Live: a API só gera orientação para sessão aberta (encerrada = 409) */}
+          {session.status === 'aberta' ? (
+            <AIDemoCard sessionId={session.id} />
+          ) : (
+            <div className="rounded-lg border border-slate-200 bg-white p-4 text-sm text-slate-600 shadow-sm">
+              O Proteca Live fica disponível enquanto a sessão está aberta. Esta sessão já foi encerrada.
+            </div>
+          )}
 
           {/* Histórico de Ações da Sessão */}
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4">
