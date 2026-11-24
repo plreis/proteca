@@ -158,3 +158,91 @@ def test_live_guidance_falls_back_on_invalid_json(monkeypatch):
     )
 
     assert response.is_mock is True
+
+
+GOOD_GUIDANCE = (
+    '{"attention_level":"atenção","observed_pattern":"Parte da turma dispersou.",'
+    '"teacher_suggestions":["Retome o objetivo."],"intervention":null}'
+)
+
+
+class GeminiReply:
+    def __init__(self, status_code=200, text=GOOD_GUIDANCE):
+        self.status_code = status_code
+        self.text = text
+
+    def raise_for_status(self):
+        if self.status_code >= 400:
+            request = httpx.Request("POST", "https://example.com")
+            raise httpx.HTTPStatusError(
+                "erro do Gemini",
+                request=request,
+                response=httpx.Response(self.status_code, request=request),
+            )
+
+    def json(self):
+        return {"candidates": [{"content": {"parts": [{"text": self.text}]}}]}
+
+
+class GeminiByModel:
+    """Simula o Gemini respondendo de forma diferente para cada modelo da URL."""
+
+    def __init__(self, replies):
+        self.replies = replies
+        self.models_called = []
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        return None
+
+    def post(self, url, **kwargs):
+        model = url.split("/models/")[1].split(":")[0]
+        self.models_called.append(model)
+        return self.replies[model]
+
+
+def use_fake_gemini(monkeypatch, replies, models):
+    fake = GeminiByModel(replies)
+    monkeypatch.setattr(settings, "GEMINI_API_KEY", "test-key")
+    monkeypatch.setattr(settings, "GEMINI_MODEL", models[0])
+    monkeypatch.setattr(settings, "GEMINI_FALLBACK_MODELS", models[1:])
+    monkeypatch.setattr("app.services.ai_guidance.httpx.Client", lambda **kwargs: fake)
+    return fake
+
+
+def test_live_guidance_uses_next_model_when_first_is_overloaded(monkeypatch):
+    fake = use_fake_gemini(
+        monkeypatch,
+        {"modelo-a": GeminiReply(status_code=503), "modelo-b": GeminiReply()},
+        ["modelo-a", "modelo-b"],
+    )
+
+    response = generate_live_guidance(
+        AILiveGuidanceRequest(session_id="sess-001", objective=OBJECTIVE)
+    )
+
+    assert response.is_mock is False
+    assert response.model == "modelo-b"
+    assert fake.models_called == ["modelo-a", "modelo-b"]
+
+
+def test_live_guidance_falls_back_locally_after_trying_every_model(monkeypatch):
+    fake = use_fake_gemini(
+        monkeypatch,
+        {
+            "sobrecarregado": GeminiReply(status_code=503),
+            "sem-cota": GeminiReply(status_code=429),
+            "removido": GeminiReply(status_code=404),
+        },
+        ["sobrecarregado", "sem-cota", "removido"],
+    )
+
+    response = generate_live_guidance(
+        AILiveGuidanceRequest(session_id="sess-001", objective=OBJECTIVE)
+    )
+
+    assert response.is_mock is True
+    assert response.model == "local-fallback"
+    assert fake.models_called == ["sobrecarregado", "sem-cota", "removido"]

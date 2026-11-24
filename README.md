@@ -121,6 +121,22 @@ Frontend (`frontend/.env.example`): `NEXT_PUBLIC_API_URL`. Nunca coloque chaves 
 
 Divisão de tarefas: `docs/plano-sprints-tarefas.md`. Situação atual: `docs/status-entrega.md`.
 
+
+
+
+DEPLOY NO COOLIFY: 
+
+BACKEND: https://api.163.176.54.212.sslip.io/api/v1/health
+
+FRONTEND: https://app.163.176.54.212.sslip.io/
+
+
+
+
+
+
+
+
 ## Licença
 
 MIT. Ver `LICENSE`.

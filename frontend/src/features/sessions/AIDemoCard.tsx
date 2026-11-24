@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { LiveGuidance, ProtecaState } from '@/types';
 import { useSchool } from '@/context/SchoolContext';
+import { requestProtecaVoice, speakWithBrowser } from '@/services/voiceService';
 
 interface AIDemoCardProps {
   sessionId: string;
@@ -26,12 +27,42 @@ export const AIDemoCard: React.FC<AIDemoCardProps> = ({ sessionId }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isAutoMode, setIsAutoMode] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [voice, setVoice] = useState<{ audioUrl: string; label: string } | null>(null);
+  const [voiceNote, setVoiceNote] = useState<string | null>(null);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+
+  // Libera o áudio anterior da memória ao trocar de orientação ou sair da tela.
+  useEffect(() => {
+    return () => {
+      if (voice) URL.revokeObjectURL(voice.audioUrl);
+    };
+  }, [voice]);
+
+  const handleSpeak = async (text: string) => {
+    setIsSpeaking(true);
+    setVoiceNote(null);
+    try {
+      const result = await requestProtecaVoice(text);
+      setVoice({ audioUrl: result.audioUrl, label: `Voz: ${result.model}` });
+    } catch {
+      setVoice(null);
+      setVoiceNote(
+        speakWithBrowser(text)
+          ? 'Voz do Gemini indisponível agora; lendo com a voz do navegador.'
+          : 'Áudio indisponível neste navegador.'
+      );
+    } finally {
+      setIsSpeaking(false);
+    }
+  };
 
   const handleGenerate = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
       setGuidance(await requestLiveGuidance(sessionId));
+      setVoice(null);
+      setVoiceNote(null);
     } catch (err) {
       const detail = err instanceof Error ? ` (${err.message})` : '';
       setError(`Não foi possível gerar a orientação agora${detail}. Tente novamente.`);
@@ -143,6 +174,21 @@ export const AIDemoCard: React.FC<AIDemoCardProps> = ({ sessionId }) => {
                   <h4 className="mt-1 font-bold">{intervention.title}</h4>
                   <p className="mt-1 text-sm text-white/90">{intervention.message}</p>
                   <p className="mt-3 rounded-lg bg-black/10 p-2 text-sm font-medium text-white">{intervention.prompt}</p>
+                  <div className="mt-3 flex flex-wrap items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => handleSpeak(`${intervention.message} ${intervention.prompt}`)}
+                      disabled={isSpeaking}
+                      className="rounded-lg bg-white/90 px-3 py-1.5 text-xs font-bold text-slate-900 hover:bg-white disabled:cursor-wait disabled:opacity-60"
+                    >
+                      {isSpeaking ? 'Preparando a voz...' : 'Ouvir o Proteca'}
+                    </button>
+                    {voice && <span className="text-[11px] text-white/70">{voice.label}</span>}
+                  </div>
+                  {voice && (
+                    <audio key={voice.audioUrl} src={voice.audioUrl} controls autoPlay className="mt-2 w-full" />
+                  )}
+                  {voiceNote && <p className="mt-2 text-[11px] text-white/80">{voiceNote}</p>}
                 </div>
               </div>
             </div>

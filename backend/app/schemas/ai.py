@@ -47,3 +47,9 @@ class AILiveGuidanceResponse(BaseModel):
     limitations: str
     signals: LiveFocusSummary
     is_mock: bool = True
+
+
+class VoiceRequest(BaseModel):
+    """Texto curto da intervenção do Proteca para ser lido em voz alta para a turma."""
+
+    text: str = Field(min_length=1, max_length=500)
