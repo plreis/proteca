@@ -111,10 +111,11 @@ Sinais agregados: {request.focus.model_dump_json()}
 def _parse_generated(
     request: AILiveGuidanceRequest,
     payload: dict[str, Any],
+    model: str,
 ) -> AILiveGuidanceResponse:
     return AILiveGuidanceResponse(
         session_id=request.session_id,
-        model=settings.GEMINI_MODEL,
+        model=model,
         generated_at=datetime.now(timezone.utc),
         attention_level=str(payload["attention_level"]),
         observed_pattern=str(payload["observed_pattern"]),
@@ -142,25 +143,30 @@ def generate_live_guidance(request: AILiveGuidanceRequest) -> AILiveGuidanceResp
         },
     }
 
-    try:
-        with httpx.Client(timeout=settings.GEMINI_TIMEOUT_SECONDS) as client:
-            response = client.post(
-                GEMINI_URL.format(model=settings.GEMINI_MODEL),
-                headers={"x-goog-api-key": settings.GEMINI_API_KEY},
-                json=body,
-            )
-            response.raise_for_status()
-            text = response.json()["candidates"][0]["content"]["parts"][0]["text"]
-            return _parse_generated(request, json.loads(text))
-    except httpx.HTTPStatusError as error:
-        logger.warning(
-            "Gemini respondeu HTTP %s para o modelo %s; usando fallback local.",
-            error.response.status_code,
-            settings.GEMINI_MODEL,
-        )
-    except (httpx.HTTPError, KeyError, IndexError, TypeError, ValueError) as error:
-        logger.warning(
-            "Falha ao usar o Gemini (%s); usando fallback local.",
-            type(error).__name__,
-        )
+    # Cada modelo tem cota própria e pode estar sobrecarregado (503) ou sem cota (429):
+    # tenta na ordem configurada e só cai no fallback local se todos falharem.
+    with httpx.Client(timeout=settings.GEMINI_TIMEOUT_SECONDS) as client:
+        for model in settings.gemini_text_models:
+            try:
+                response = client.post(
+                    GEMINI_URL.format(model=model),
+                    headers={"x-goog-api-key": settings.GEMINI_API_KEY},
+                    json=body,
+                )
+                response.raise_for_status()
+                text = response.json()["candidates"][0]["content"]["parts"][0]["text"]
+                return _parse_generated(request, json.loads(text), model)
+            except httpx.HTTPStatusError as error:
+                logger.warning(
+                    "Gemini respondeu HTTP %s para o modelo %s; tentando o próximo.",
+                    error.response.status_code,
+                    model,
+                )
+            except (httpx.HTTPError, KeyError, IndexError, TypeError, ValueError) as error:
+                logger.warning(
+                    "Falha ao usar o modelo %s (%s); tentando o próximo.",
+                    model,
+                    type(error).__name__,
+                )
+    logger.warning("Nenhum modelo do Gemini respondeu; usando fallback local.")
     return _fallback(request)
