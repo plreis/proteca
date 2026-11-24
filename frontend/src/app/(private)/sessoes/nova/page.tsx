@@ -17,7 +17,9 @@ export default function NovaSessaoPage() {
 
   const [errors, setErrors] = useState<{
     classroomId?: string;
+    teacherName?: string;
     objective?: string;
+    submit?: string;
   }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -32,11 +34,17 @@ export default function NovaSessaoPage() {
     if (!classroomId) {
       errs.classroomId = 'Selecione a turma que participará da aula.';
     }
+    if (teacherName.trim().length < 3) {
+      errs.teacherName = 'Informe o nome do docente (pelo menos 3 caracteres).';
+    }
+    // Mesmos limites do schema SessionCreate da API (10 a 500 caracteres).
     const trimmed = objective.trim();
     if (!trimmed) {
       errs.objective = 'O objetivo pedagógico da aula é obrigatório.';
-    } else if (trimmed.length < 5) {
-      errs.objective = 'O objetivo deve conter pelo menos 5 caracteres.';
+    } else if (trimmed.length < 10) {
+      errs.objective = 'O objetivo deve conter pelo menos 10 caracteres.';
+    } else if (trimmed.length > 500) {
+      errs.objective = 'O objetivo deve ter no máximo 500 caracteres.';
     }
     setErrors(errs);
     return Object.keys(errs).length === 0;
@@ -50,14 +58,16 @@ export default function NovaSessaoPage() {
     try {
       const created = await createSession({
         classroomId,
-        teacherName,
+        teacherName: teacherName.trim(),
         objective: objective.trim(),
         deviceIds: selectedDeviceIds,
       });
 
       router.push(`/sessoes/detalhe?id=${encodeURIComponent(created.id)}`);
-    } catch {
-      setErrors({ objective: 'Ocorreu um erro ao abrir a sessão. Tente novamente.' });
+    } catch (err) {
+      // Ex.: 409 "Dispositivo 'DEV-TB-0201' não está disponível." vindo da API.
+      const detail = err instanceof Error ? err.message : 'Tente novamente.';
+      setErrors({ submit: `Não foi possível abrir a sessão: ${detail}` });
       setIsSubmitting(false);
     }
   };
@@ -109,8 +119,10 @@ export default function NovaSessaoPage() {
               type="text"
               value={teacherName}
               onChange={(e) => setTeacherName(e.target.value)}
+              aria-describedby={errors.teacherName ? 'session-teacher-error' : undefined}
               className="w-full py-2.5 px-3 border border-slate-300 rounded-md text-sm bg-white focus:outline-none focus:ring-1 focus:ring-brand-action focus:border-brand-action"
             />
+            <FieldError id="session-teacher-error" message={errors.teacherName} />
           </div>
 
           {/* Objetivo Pedagógico */}
@@ -205,6 +217,12 @@ export default function NovaSessaoPage() {
               Dispositivos alocados serão marcados como &quot;Em Uso&quot; e liberados automaticamente ao término da sessão.
             </p>
           </div>
+
+          {errors.submit && (
+            <p role="alert" className="rounded-md bg-red-50 p-3 text-sm text-red-700">
+              {errors.submit}
+            </p>
+          )}
 
           {/* Ações */}
           <div className="pt-4 border-t border-slate-200 flex justify-end gap-3">
