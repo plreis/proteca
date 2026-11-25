@@ -1,4 +1,5 @@
 import httpx
+import pytest
 
 from app.core.config import settings
 from app.schemas.ai import AILiveGuidanceRequest
@@ -246,3 +247,55 @@ def test_live_guidance_falls_back_locally_after_trying_every_model(monkeypatch):
     assert response.is_mock is True
     assert response.model == "local-fallback"
     assert fake.models_called == ["sobrecarregado", "sem-cota", "removido"]
+
+
+def test_live_guidance_brings_the_proteca_speech_from_gemini(monkeypatch):
+    FakeClient.calls = []
+    text = (
+        '{"attention_level":"atenção","observed_pattern":"Parte da turma dispersou.",'
+        '"teacher_suggestions":["Retome o objetivo."],'
+        '"intervention":{"state":"curiosidade","title":"Proteca tem uma pergunta",'
+        '"message":"Uma pista pode ajudar a turma a reencontrar o objetivo.",'
+        '"prompt":"Que parte do objetivo você explica com um exemplo?",'
+        '"speech":"Turma, eu tenho uma pergunta: quem explica o objetivo com um exemplo?"}}'
+    )
+    monkeypatch.setattr(settings, "GEMINI_API_KEY", "test-key")
+    monkeypatch.setattr(
+        "app.services.ai_guidance.httpx.Client",
+        lambda **kwargs: FakeClient(response=FakeResponse(text)),
+    )
+
+    response = generate_live_guidance(
+        AILiveGuidanceRequest(session_id="sess-001", objective=OBJECTIVE)
+    )
+
+    assert response.is_mock is False
+    assert response.intervention.speech == (
+        "Turma, eu tenho uma pergunta: quem explica o objetivo com um exemplo?"
+    )
+    intervention_schema = FakeClient.calls[0]["json"]["generationConfig"]["responseSchema"][
+        "properties"
+    ]["intervention"]
+    assert "speech" in intervention_schema["properties"]
+    assert "speech" in intervention_schema["required"]
+    assert "speech" in FakeClient.calls[0]["json"]["contents"][0]["parts"][0]["text"]
+
+
+@pytest.mark.parametrize(
+    ("focus", "state"),
+    [
+        ({"safety_alerts": 1}, "alerta"),
+        ({"active_devices": 2, "focus_lost_events": 5}, "curiosidade"),
+        ({}, "acolhimento"),
+    ],
+)
+def test_fallback_intervention_has_a_short_proteca_speech(client, focus, state):
+    response = client.post(
+        "/api/v1/ia/live",
+        json={"session_id": "sess-001", "objective": OBJECTIVE, "focus": focus},
+    )
+
+    intervention = response.json()["intervention"]
+    assert intervention["state"] == state
+    assert intervention["speech"]
+    assert len(intervention["speech"].split()) <= 25

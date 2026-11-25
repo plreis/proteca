@@ -34,6 +34,8 @@ class ProtecaIntervention(BaseModel):
     title: str = Field(min_length=1, max_length=120)
     message: str = Field(min_length=1, max_length=500)
     prompt: str = Field(min_length=1, max_length=300)
+    # Fala do Proteca: até 25 palavras, em primeira pessoa, dirigida à turma, feita para ser ouvida.
+    speech: str | None = Field(default=None, max_length=300)
 
 
 class AILiveGuidanceResponse(BaseModel):
