@@ -47,6 +47,7 @@ class TTSByModel:
     def __init__(self, replies):
         self.replies = replies
         self.models_called = []
+        self.bodies = []
 
     def __enter__(self):
         return self
@@ -57,6 +58,7 @@ class TTSByModel:
     def post(self, url, **kwargs):
         model = url.split("/models/")[1].split(":")[0]
         self.models_called.append(model)
+        self.bodies.append(kwargs["json"])
         return self.replies[model]
 
 
@@ -107,3 +109,12 @@ def test_voice_requires_login(client):
     response = client.post("/api/v1/ia/voz", json={"text": MESSAGE})
 
     assert response.status_code == 401
+
+
+def test_voice_sends_only_the_speech_text_to_the_tts_model(client, monkeypatch):
+    fake = use_fake_tts(monkeypatch, {"tts-ok": TTSReply()})
+
+    client.post("/api/v1/ia/voz", json={"text": MESSAGE})
+
+    # Qualquer instrução extra no texto é lida em voz alta pelo modelo TTS.
+    assert fake.bodies[0]["contents"][0]["parts"][0]["text"] == MESSAGE

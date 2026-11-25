@@ -43,7 +43,9 @@ def synthesize_speech(text: str) -> SpeechAudio | None:
         return None
 
     body = {
-        "contents": [{"parts": [{"text": f"Leia com voz calma e acolhedora, em português do Brasil: {text}"}]}],
+        # Só a fala: o modelo TTS lê em voz alta qualquer instrução colocada aqui.
+        # O tom vem da voz escolhida (GEMINI_TTS_VOICE) e do próprio texto.
+        "contents": [{"parts": [{"text": text}]}],
         "generationConfig": {
             "responseModalities": ["AUDIO"],
             "speechConfig": {
