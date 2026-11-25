@@ -1,65 +1,59 @@
-# Registro de Decisões Técnicas e Metodológicas — Proteca
+# Registro de decisões — Proteca
 
-## 1. Composição da Equipe e Alinhamento Institucional
-- **Configuração Inicial (Sprint 1):** Pedro Lucas dos Reis Silva (RA 2272040) executou o setup inicial e a Sprint 1 individualmente em virtude de número ímpar de alunos e indefinição de parcerias no início da aula.
-- **Decisão Pós-Sprint 1:** A coordenação da disciplina estabeleceu formalmente a **obrigatoriedade estrita de duplas** para todas as equipes. O projeto Proteca passa a ser conduzido oficialmente pela dupla **Pedro Lucas dos Reis Silva (RA 2272040)** e **Henrique Cois Farjado Gau (RA 2369133)**.
-- **Diretriz de Trabalho:** Conforme o regulamento da disciplina, ambos os membros atuam de forma equilibrada em todas as etapas (Frontend Next.js, Backend FastAPI, Inteligência Artificial Gemini, Banco SQLModel, Testes, Deploy e Documentação), com distribuição contínua de commits no repositório Git público.
+Decisões que afetam os dois membros da dupla são tomadas juntas e anotadas aqui. Quando a decisão muda a arquitetura ou o escopo, ela também vira uma ADR em `docs/adr/`. Os termos seguem o `GLOSSARY.md`.
 
----
+## Decididas
 
-## 2. Escolha do Tema 12
-- **Tema:** 12 — Segurança, controle e uso pedagógico dos dispositivos fornecidos pelo governo.
-- **Justificativa:** Problema de alta relevância pedagógica nas escolas públicas brasileiras decorrente das remessas em massa de Chromebooks e tablets educacionais, onde a gestão em sala de aula precisa de soluções que priorizem a mediação pedagógica sem recorrer a vigilância invasiva contra menores.
+| Data | Decisão | Por quê | Registro |
+|---|---|---|---|
+| até 04/11 | Tema 12: segurança, controle e uso pedagógico dos dispositivos fornecidos pelo governo | Problema real das escolas que receberam Chromebooks e tablets, e dá para atacar sem vigiar estudantes | — |
+| depois de 04/11 | Dupla Pedro Lucas dos Reis Silva (RA 2272040) e Henrique Cois Farjado Gau (RA 2369133) | Pedro fez a Sprint 1 sozinho porque a turma tinha número ímpar; depois a disciplina passou a exigir duplas | — |
+| Sprint 1 | Frontend em Next.js e backend em Python/FastAPI | O enunciado fala em "uma única linguagem", mas detalha a stack Next.js + FastAPI + SQLModel + JWT. Seguimos a stack detalhada | — |
+| 18/11 | Coolify na VM da equipe para a API e o site, com HTTPS em `sslip.io` | Os dois serviços ficam no mesmo lugar, com segredos fora do repositório e sem depender de plano gratuito de terceiros | [ADR 0001](adr/0001-stack-e-hospedagem.md) |
+| 18/11 | Sem captura de tela, sem fotos, sem painel multitela e sem índice de desatenção | Guardar imagem de estudante é o próprio risco que o tema aponta, e não daria tempo de terminar até 30/11 | [ADR 0002](adr/0002-escopo-e-privacidade.md) |
+| 18/11 | Nenhum dado de estudante; a ocorrência aponta para o dispositivo e a sessão; o Gemini recebe só o objetivo e contagens | Cumprir LGPD, ECA e ECA Digital sem precisar de consentimento de cada estudante | [ADR 0002](adr/0002-escopo-e-privacidade.md) |
+| 18/11 | Nada entra na `main` sem PR revisado pelo outro | Quem revisa precisa saber explicar o código na review | `docs/plano-sprints-tarefas.md` |
+| 23/11 | Rodízio de modelos do Gemini: 4 modelos de texto e 4 de voz, tentados em ordem | Um modelo sozinho às vezes responde 503 (sobrecarregado) ou 429 (cota esgotada). Os `lite` vêm primeiro porque a cota gratuita deles é de 500 requisições por dia, contra 20 dos `flash` | PR #26, `backend/app/core/config.py` |
+| 23/11 | Se nenhum modelo de texto responde, a API devolve a orientação de reserva; se nenhum modelo de voz responde, o site usa a voz do navegador | O Live e a voz não podem travar a aula por falta de cota | PR #26 |
+| 24/11 | SQLite num volume persistente da VM (`/app/data`) no lugar do Postgres do Supabase; site exportado como estático e servido por nginx | Na nossa VM o volume sobrevive a reinício e redeploy, e não dependemos de serviço externo nem de pooler. O site não usa nada que precise de servidor Node | [ADR 0003](adr/0003-sqlite-na-vm-e-site-estatico.md) |
+| 24/11 | Tela da turma pública, aberta pelo código da turma, sem login, sem cookies e sem enviar nada à API | Consentimento pedido pelo professor não é livre, e abaixo de 12 anos a LGPD exige o responsável. Um site também não enxerga outras abas | [ADR 0004](adr/0004-tela-da-turma-sem-coleta.md) |
+| 24/11 | Gestor fora do escopo desta entrega; o professor é o único papel com acesso | O código não tem regra diferente para o gestor, e funcionalidade pela metade não é pontuada | [ADR 0004](adr/0004-tela-da-turma-sem-coleta.md) |
+| 24/11 | Fala do Proteca: a intervenção ganha o campo `speech`, curto, em primeira pessoa e dirigido à turma | Mensagem e pergunta escritas para leitura ficam longas e estranhas quando lidas em voz alta | `GLOSSARY.md` |
+| 24/11 | Voz Puck no TTS, e o modelo de voz recebe só a fala | Na primeira versão o modelo lia em voz alta a instrução de tom junto com a fala. Agora o tom vem só da voz escolhida, e a Puck é animada, o que combina com um mascote que convida em vez de dar bronca. A anterior, Kore, é mais firme | `GEMINI_TTS_VOICE`, PR #27 |
+| 24/11 | Sem divisão fixa de tarefas: cada um pega o item que puder da lista em `docs/status-entrega.md` | Faltam poucos dias e os itens dependem uns dos outros. O enunciado exige que os dois saibam explicar qualquer parte | `docs/status-entrega.md` |
 
----
+## Para decidir juntos
 
-## 3. Arquitetura da Stack Tecnológica
-- **Decisão:** Frontend Next.js 15, backend FastAPI em Python 3.12, PostgreSQL do Supabase via SQLModel na Sprint 4, JWT na Sprint 3 e Gemini só no backend. Hospedagem no Coolify da VM da equipe. Detalhes e motivos em `docs/adr/0001-stack-e-hospedagem.md` (18/11), que substitui as menções anteriores a Vercel, Render e Fly.io.
-- **Nota sobre a linguagem única:** O enunciado continha uma menção genérica a "todo o sistema em uma única linguagem, Java ou Python", porém detalhava especificamente a stack obrigatória: Next.js + FastAPI + SQLModel + JWT. Optou-se por seguir a stack detalhada da disciplina, mantendo o frontend e o backend desacoplados.
+### (a) Como apresentamos o Proteca no pitch?
 
----
+**Recomendação:** como uma camada pedagógica que complementa o filtro e o gerenciamento de dispositivos da SEED. O filtro bloqueia sites; o Proteca ajuda o professor a mediar o que acontece na sala. No futuro ele pode virar um módulo desse ecossistema. Ele ajuda sem dados pessoais porque trabalha com registros factuais do professor por dispositivo (número de patrimônio) e com sinais agregados da sessão.
 
-## 4. Política de Publicação e Controle de Artefatos
-- **Decisão:** O repositório público `https://github.com/plreis/proteca` e a entrega contêm estritamente os arquivos técnicos necessários para execução (`frontend/`, `backend/`, `README.md`, `.gitignore`, licença e workflows).
-- **Artefatos Locais:** Prompts operacionais, roteiros internos, minutas do fórum e status de entrega são mantidos no diretório local `DevWeb/PROJETO_FINAL_A3/` e não integram o repositório público.
+**Por quê:** evita a comparação com o filtro, que não é o que fazemos. Também responde logo a primeira dúvida de quem é de fora: "isso vigia o aluno?".
 
----
+**Cuidado:** não dizer que existe integração com a SEED. Nunca conversamos com eles; "pode virar um módulo" é proposta, não fato.
 
-## 5. Decisões Arquiteturais para as Demandas Levantadas em Aula
+### (b) Quem opera qual aparelho e quem fala o quê no pitch?
 
-> **Revisão em 18/11:** a captura de tela, os anexos de foto, o painel multitela e o índice de desatenção descritos abaixo saíram do escopo. O motivo (privacidade dos estudantes e prazo) está em `docs/adr/0002-escopo-e-privacidade.md`. O texto abaixo fica como registro do que foi discutido em 04/11.
+**Recomendação:** uma pessoa fica no notebook projetado (abre o Live e clica em "Mostrar para a turma"). A outra entrega o tablet à banca, ajuda a abrir a tela da turma com o código `AULA8B` e explica a parte de privacidade. As falas do problema e do fecho ficam com quem estiver livre naquele momento. Em um dos ensaios, trocamos os papéis.
 
-Durante o uso da Sprint 1 e os alinhamentos presenciais, foram analisadas e decididas três questões centrais de engenharia e produto:
+**Por quê:** o enunciado dá desconto se um dos dois não souber explicar uma parte. Trocar no ensaio garante que qualquer um segura o pitch se algo der errado.
 
-### 5.1. Problema 1: Monitoramento dos PCs em Tempo Real — Tecnologia e Viabilidade
-- **Análise do Problema:** Como acompanhar os computadores/tablets dos alunos em sala com alta fidedignidade sem depender de instalação de programas locais nos Chromebooks governamentais (que possuem travas de superadministrador/MDM e restrições legais)?
-- **Decisão Técnica:** Adoção de arquitetura **Web Standards Client-Side (Sessão Web do Aluno)**:
-  1. *Sem agentes nativos invasivos:* Instalar binários de monitoramento no SO dos alunos violaria as políticas de segurança escolar do Estado e o artigo 14 da LGPD (proteção integral a menores).
-  2. *Telemetria via Navegador Institucional:* O aluno ingressa na aula pelo navegador acessando a rota `/aula/{sessionId}`.
-  3. *Page Visibility API:* A aplicação utiliza nativamente `document.visibilitychange` e eventos `window.onblur`/`window.onfocus`. Quando o estudante minimiza a janela pedagógica ou alterna para outra aba (ex: jogos, vídeos, redes sociais), o cliente web dispara imediatamente um evento de telemetria `PERDA_DE_FOCO`.
-  4. *Heartbeat Leve:* Envio periódico de pulso (a cada 10s) via WebSocket ou Polling curto para confirmar que o dispositivo continua conectado e ativo na aula.
+**Decidir até:** o primeiro ensaio, no máximo em 29/11.
 
-### 5.2. Problema 2: Comprovação Factual, Índice de Desatenção e Alertas de Segurança
-- **Comprovação com Captura Factual (Prints):**
-  - O sistema oferece duas modalidades éticas de comprovação:
-    a) *Captura assistida pelo navegador:* Utilização da WebRTC Screen Capture API (`navigator.mediaDevices.getDisplayMedia`), na qual a aba do aluno compartilha o stream com a aula com consentimento transparente, permitindo registrar snapshot no instante de um desvio;
-    b) *Anexo factual pelo professor:* O professor pode carregar no formulário da ocorrência uma fotografia/evidência factual presenciada em sala de aula (ex: uso indevido de smartphone, gravação indevida).
-  - *Salvaguarda:* O sistema não grava áudio ou vídeo contínuos e armazena apenas snapshots pontuais diretamente atrelados ao registro de ocorrência, sanitizando metadados.
-- **Índice de Desatenção da Turma:**
-  - Métrica quantitativa agregada calculada pelo backend para apoiar a regulação pedagógica da aula:
-    $$\text{Índice} = \min\left(100, \, \left(\frac{\sum T_{\text{desfocado}}}{N_{\text{dispositivos}} \times T_{\text{aula}}} \times 65\right) + \left(\frac{\text{Ocorrências}}{\text{Dispositivos}} \times 35\right)\right)$$
-  - Fornece feedback visual em três faixas semânticas (Verde: foco alto; Amarelo: dispersão moderada; Vermelho: desvio crítico).
-- **Alertas de Segurança e Risco:**
-  - Gatilhos automáticos para desatenção contínua prolongada (> 3 min fora da aba) e alertas categorizados de risco à privacidade (ex: compartilhamento de imagens de colegas, tentativa de burlar a sessão).
+### (c) Reenviamos alguma entrega no Moodle?
 
-### 5.3. Problema 3: Dashboard Multitela, Visão Individual e Síntese de IA
-- **Dashboard Multitela (Grid da Sala):** Painel do professor estruturado em mosaico de cards correspondentes a cada Chromebook do carrinho (CB-01 a CB-30). Cada card exibe o estado em tempo real: *Conectado*, *Em Foco*, *Em Segundo Plano*, ou *Alerta Emitido*, permitindo abertura rápida de ocorrência com 1 clique.
-- **Visão Individual:** Página/modal de detalhe do equipamento contendo linha do tempo cronológica com todos os eventos e ocorrências da sessão.
-- **Síntese Assistida com Google Gemini:**
-  - O professor clica em *"Sugerir Orientação Pedagógica"*.
-  - A API FastAPI compila o resumo da sessão (duração, objetivo, taxa de foco, ocorrências agrupadas por categoria) sem identificadores pessoais.
-  - O Gemini gera uma análise formativa orientada a metodologias ativas:
-    1) Leitura diagnóstica do ritmo da aula;
-    2) Identificação de gargalos de interesse;
-    3) Sugestões práticas de mediação presencial;
-    4) Orientações preventivas para a coordenação pedagógica.
+**Contexto:** a entrega da Sprint 1 no Moodle tem só o nome do Pedro e aponta para `github.com/plreis/PROJETO_FINAL_DEV_WEB` e `plreis.github.io/PROJETO_FINAL_DEV_WEB/`. O link do repositório ainda redireciona para `plreis/proteca`, mas o do GitHub Pages dá 404.
+
+**Recomendação:** se a tarefa da Sprint 1 ainda aceitar envio, reenviar com a dupla e os links atuais. Se não aceitar, não insistir: deixar a dupla e os links atuais no PDF da documentação final e avisar o professor na review de 30/11.
+
+### (d) Adesão de dispositivos e sinal de foco entram como próximo passo?
+
+**Recomendação:** sim, mas só como próximo passo no pitch e na documentação, sem código nesta entrega. Antes de qualquer código é preciso decidir com a escola qual base legal da LGPD vale para isso. O consentimento do estudante não serve (ADR 0004). O sinal guardaria só contagens por sessão, nunca endereço de site nem conteúdo da tela.
+
+**Por quê:** a rota `/telemetry` já existe e o Live já conta eventos de foco perdido, então o caminho técnico é curto. O que falta é a decisão sobre dados de crianças e adolescentes, e essa não é nossa.
+
+### (e) Qual seria o papel de gestor no futuro?
+
+**Recomendação:** manter fora desta entrega. Se voltar, o gestor só leria o inventário e as ocorrências de todas as turmas, sem acesso ao Live nem à tela da turma. Isso pede regra por perfil no backend: hoje o `UserRole.GESTOR` existe no schema, mas nenhuma rota trata ele de forma diferente.
+
+**Junto com isso:** tirar "professores e gestores" do `README.md`, para o texto bater com a ADR 0004. Se a banca perguntar, a resposta é "papel futuro, fora do escopo desta entrega".
