@@ -1,6 +1,6 @@
 # ADR 0002 — Escopo das Sprints 3 e 4 e limites de privacidade
 
-- **Status:** aceita
+- **Status:** aceita; complementada pela ADR 0004 (tela da turma e Gestor)
 - **Data:** 18/11/2026
 - **Substitui:** itens do plano de 04/11 (multitela, índice de desatenção, captura de tela e anexos de foto)
 

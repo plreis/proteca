@@ -41,8 +41,13 @@ export async function requestProtecaVoice(text: string): Promise<ProtecaVoice> {
   };
 }
 
+export interface BrowserSpeechHandlers {
+  onStart?: () => void;
+  onEnd?: () => void;
+}
+
 /** Reserva sem cota: a voz do próprio navegador, em pt-BR. */
-export function speakWithBrowser(text: string): boolean {
+export function speakWithBrowser(text: string, handlers: BrowserSpeechHandlers = {}): boolean {
   if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
     return false;
   }
@@ -50,6 +55,21 @@ export function speakWithBrowser(text: string): boolean {
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.lang = 'pt-BR';
   utterance.rate = 0.95;
+  // Prefere uma voz instalada em português do Brasil, quando o sistema tiver.
+  const voice = window.speechSynthesis
+    .getVoices()
+    .find((option) => option.lang.replace('_', '-').toLowerCase().startsWith('pt-br'));
+  if (voice) utterance.voice = voice;
+  utterance.onstart = () => handlers.onStart?.();
+  utterance.onend = () => handlers.onEnd?.();
+  utterance.onerror = () => handlers.onEnd?.();
   window.speechSynthesis.speak(utterance);
   return true;
+}
+
+/** Interrompe a voz do navegador, se estiver falando. */
+export function stopBrowserSpeech(): void {
+  if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+  }
 }

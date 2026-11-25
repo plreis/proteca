@@ -36,8 +36,9 @@ RESPONSE_SCHEMA = {
                 "title": {"type": "STRING"},
                 "message": {"type": "STRING"},
                 "prompt": {"type": "STRING"},
+                "speech": {"type": "STRING"},
             },
-            "required": ["state", "title", "message", "prompt"],
+            "required": ["state", "title", "message", "prompt", "speech"],
         },
     },
     "required": ["attention_level", "observed_pattern", "teacher_suggestions"],
@@ -54,6 +55,10 @@ def _fallback(request: AILiveGuidanceRequest) -> AILiveGuidanceResponse:
             title="Proteca em modo guardião",
             message="Vamos fazer uma pausa rápida para revisar segurança e respeito digital.",
             prompt="Qual atitude protege o aprendizado e os colegas nesta atividade?",
+            speech=(
+                "Turma, sou o Proteca. Vamos pausar um minutinho: aqui a gente cuida "
+                "da segurança e da imagem de todos."
+            ),
         )
     elif focus.focus_lost_events > max(1, focus.active_devices):
         level = "atenção"
@@ -63,6 +68,10 @@ def _fallback(request: AILiveGuidanceRequest) -> AILiveGuidanceResponse:
             title="Proteca tem uma pergunta",
             message="Uma pista pode ajudar a turma a reencontrar o objetivo da aula.",
             prompt="Que parte do objetivo você consegue explicar com um exemplo?",
+            speech=(
+                "Turma, eu tenho uma pergunta: que parte do nosso objetivo vocês "
+                "conseguem explicar com um exemplo?"
+            ),
         )
     else:
         level = "foco"
@@ -72,6 +81,10 @@ def _fallback(request: AILiveGuidanceRequest) -> AILiveGuidanceResponse:
             title="Proteca reconhece o foco",
             message="A turma está conectada ao objetivo. Aproveite o momento para aprofundar.",
             prompt="Quem consegue relacionar o conteúdo a uma situação real?",
+            speech=(
+                "Que bom ver vocês tão focados! Eu adoraria saber: quem liga o que "
+                "estamos estudando a uma situação real?"
+            ),
         )
 
     return AILiveGuidanceResponse(
@@ -102,7 +115,9 @@ Quando houver ocorrência de privacidade (câmera, imagem de colegas), oriente u
 coletiva sobre consentimento e direito de imagem.
 Responda em português, em JSON, com: attention_level (foco, atenção ou alerta),
 observed_pattern, teacher_suggestions (no máximo 2 frases curtas) e intervention
-(objeto com state, title, message e prompt, ou null).
+(objeto com state, title, message, prompt e speech, ou null).
+speech: a mesma ideia da intervenção em até 25 palavras, em primeira pessoa como o Proteca,
+falando com a turma; é a fala que será lida em voz alta, sem instruções nem rótulos.
 Objetivo da aula: {request.objective}
 Sinais agregados: {request.focus.model_dump_json()}
 """.strip()

@@ -4,6 +4,9 @@ from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 INSECURE_SECRET_KEY = "insecure-default-change-in-production"
+# Relativo ao diretório de trabalho: no container (WORKDIR /app) vira /app/data/proteca.db,
+# onde o Coolify monta o volume persistente (ADR 0003).
+DEFAULT_DATABASE_URL = "sqlite:///./data/proteca.db"
 EXAMPLE_SECRET_KEYS = {
     INSECURE_SECRET_KEY,
     "troque-esta-chave",
@@ -31,8 +34,8 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
     SENHA_TESTE_HASH: str = "COLE_AQUI_O_HASH_GERADO"  # Hash de senha para teste (Sprint 3)
-    # Banco de dados (Sprint 4). Sem valor, a API usa o repositório em memória.
-    DATABASE_URL: str | None = None
+    # Banco de dados (Sprint 4): SQLite acessado só pelo SQLModel.
+    DATABASE_URL: str = DEFAULT_DATABASE_URL
     SEED_DEMO_DATA: bool = True
 
     # Gemini: a chave fica só no servidor.
@@ -53,7 +56,7 @@ class Settings(BaseSettings):
         "gemini-3.1-flash-tts-preview",
         "gemini-2.5-flash-preview-tts",
     ]
-    GEMINI_TTS_VOICE: str = "Kore"
+    GEMINI_TTS_VOICE: str = "Puck"
 
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     @classmethod
@@ -74,12 +77,19 @@ class Settings(BaseSettings):
         """Ordem de tentativa: preferido primeiro, reservas depois, sem repetir."""
         return list(dict.fromkeys([self.GEMINI_MODEL, *self.GEMINI_FALLBACK_MODELS]))
 
-    @field_validator("GEMINI_API_KEY", "DATABASE_URL", mode="before")
+    @field_validator("GEMINI_API_KEY", mode="before")
     @classmethod
     def empty_string_is_none(cls, value: str | None) -> str | None:
         if isinstance(value, str) and not value.strip():
             return None
         return value
+
+    @field_validator("DATABASE_URL", mode="before")
+    @classmethod
+    def empty_database_url_is_default(cls, value: str | None) -> str:
+        if value is None or (isinstance(value, str) and not value.strip()):
+            return DEFAULT_DATABASE_URL
+        return value.strip()
 
     @model_validator(mode="after")
     def require_real_secret_in_production(self) -> "Settings":

@@ -13,6 +13,8 @@ RUN pip install -r requirements.txt
 COPY app ./app
 
 RUN useradd --create-home --uid 1000 proteca
+# Banco SQLite: o volume persistente do Coolify é montado em /app/data (ADR 0003).
+RUN mkdir -p /app/data && chown proteca:proteca /app/data
 USER proteca
 
 EXPOSE 8000

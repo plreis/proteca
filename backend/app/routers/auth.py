@@ -10,6 +10,7 @@ from app.auth.middleware import (
     authenticate_user,
     create_access_token,
 )
+from app.db import SessionDep
 from app.schemas.auth import TokenResponse, UserPublic
 
 
@@ -19,8 +20,9 @@ router = APIRouter(prefix="/auth", tags=["Autenticação"])
 @router.post("/token", response_model=TokenResponse)
 def login(
     form: Annotated[OAuth2PasswordRequestForm, Depends()],
+    session: SessionDep,
 ):
-    user = authenticate_user(form.username, form.password)
+    user = authenticate_user(session, form.username, form.password)
 
     if user is None:
         raise HTTPException(

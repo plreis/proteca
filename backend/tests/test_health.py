@@ -8,7 +8,7 @@ def test_health_reports_storage_and_ai_mode(client):
     data = response.json()
     assert data["status"] == "ok"
     assert data["app"] == settings.PROJECT_NAME
-    assert data["storage"] == "memory"
+    assert data["storage"] == "sqlite"
     assert data["ai_provider"] == "local-fallback"
 
 

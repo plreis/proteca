@@ -18,7 +18,7 @@ class UserPublic(BaseModel):
     disabled: bool = False
 
 
-class UserInMemory(UserPublic):
+class UserInDB(UserPublic):
     hashed_password: str
 
 

@@ -39,4 +39,6 @@ class SessionResponse(BaseModel):
     ended_at: datetime | None = None
     allocated_device_ids: list[str] = Field(default_factory=list)
     closing_justification: str | None = None
+    # Código da turma: abre a tela da turma (sem login) enquanto a sessão está aberta.
+    class_code: str = Field(min_length=6, max_length=6)
     action_log: list[SessionActionEntry] = Field(default_factory=list)
