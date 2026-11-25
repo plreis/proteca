@@ -1,41 +1,93 @@
-# Glossário
+# Proteca
 
-## Proteca
+O Proteca apoia o professor da educação básica a mediar o uso dos Chromebooks e tablets da escola durante a aula, com foco no objetivo pedagógico e na segurança digital, sem vigiar os estudantes.
 
-Assistente pedagógico de foco e segurança digital usado pelo professor durante uma sessão de aula.
+## Linguagem
 
-## Sessão de aula
+### Aula
 
-Período em que o professor conduz uma atividade com um objetivo pedagógico definido e acompanha o uso dos dispositivos disponibilizados à turma.
+**Sessão de aula**:
+Período em que o professor conduz uma atividade com um objetivo pedagógico e um conjunto de dispositivos vinculados. Está aberta ou encerrada.
+_Evitar_: aula (sozinho), turno
 
-## Intervenção Proteca
+**Objetivo pedagógico**:
+Resultado de aprendizagem que orienta a sessão e dá contexto ao Live e às intervenções.
+_Evitar_: tema, assunto
 
-Convite breve e não punitivo para retomar o objetivo, refletir sobre segurança digital ou aprofundar o conteúdo da sessão.
+**Turma**:
+Grupo de estudantes que participa de uma sessão, identificado só pelo nome do grupo (por exemplo, 8º B), nunca pelos estudantes.
+_Evitar_: classe, sala
 
-## Sinal agregado
+**Professor**:
+Pessoa que abre e encerra sessões, registra ocorrências e decide quais intervenções chegam à turma. É o único papel com acesso nesta entrega.
+_Evitar_: usuário
 
-Indicação coletiva sobre o andamento da sessão, sem identificar individualmente estudantes nem registrar o conteúdo de suas telas.
+**Gestor**:
+Papel futuro, da equipe pedagógica ou da direção, que acompanharia o inventário e as ocorrências de todas as turmas. Fora do escopo desta entrega.
 
-## Live
+### Dispositivos
 
-Momento escolhido pelo professor para receber uma leitura formativa da sessão e sugestões de mediação.
+**Dispositivo**:
+Chromebook, tablet ou notebook da escola, identificado pelo número de patrimônio. Está disponível, em uso (vinculado a uma sessão aberta) ou em manutenção.
+_Evitar_: máquina, equipamento
 
-## Objetivo pedagógico
+**Inventário**:
+Conjunto dos dispositivos da escola com o estado atual de cada um.
 
-Resultado de aprendizagem que orienta a atividade e dá contexto para as perguntas e intervenções da Proteca.
+### Acompanhamento
 
-## Ocorrência
+**Ocorrência**:
+Registro factual, feito pelo professor, de um evento com um dispositivo durante a sessão que pede mediação. Passa de aberta para em análise e depois para encerrada, sempre por decisão humana.
+_Evitar_: infração, punição, denúncia
 
-Registro factual de um evento que demanda mediação ou acompanhamento do professor, com decisão humana sobre seu encaminhamento.
+**Categoria de ocorrência**:
+Tipo do evento registrado: uso não pedagógico, acesso indevido, privacidade e exposição, dano físico ao equipamento ou desvio de foco.
 
-## Dispositivo
+**Justificativa**:
+Texto obrigatório que explica o que foi decidido ao encerrar uma sessão ou uma ocorrência.
 
-Chromebook, tablet ou notebook da escola, identificado pelo número de patrimônio. Pode estar disponível, em uso (vinculado a uma sessão aberta) ou em manutenção.
+**Sinal agregado**:
+Contagem coletiva sobre a sessão, como dispositivos ativos, ocorrências abertas e alertas de segurança, sem identificar estudantes nem registrar o conteúdo das telas.
+_Evitar_: monitoramento, rastreamento
 
-## Gestor
+**Alerta de segurança**:
+Sinal agregado de risco à privacidade ou à integridade, como o uso da câmera para fotografar colegas sem autorização.
+_Evitar_: alerta (sozinho)
 
-Pessoa da equipe pedagógica ou da direção que acompanha o inventário e as ocorrências de todas as turmas.
+### Proteca
 
-## Fallback local
+**Proteca**:
+Mascote e assistente de foco e segurança digital que apoia o professor durante a sessão e conversa com a turma por meio das intervenções.
 
-Resposta da Proteca Live gerada por regras fixas da API quando o Gemini não está configurado ou falha. Sempre marcada com `is_mock: true`.
+**Live**:
+Leitura formativa da sessão, pedida pelo professor, com nível de atenção, padrão observado, sugestões de mediação e, quando cabe, uma intervenção.
+_Evitar_: relatório, análise
+
+**Nível de atenção**:
+Leitura coletiva do momento da turma no Live: foco, atenção ou alerta.
+
+**Intervenção Proteca**:
+Convite breve e não punitivo para a turma retomar o objetivo, refletir sobre segurança digital ou aprofundar o conteúdo. Só chega à turma quando o professor decide.
+_Evitar_: advertência, bronca
+
+**Humor do Proteca**:
+Tom da intervenção, expresso pelo mascote: acolhimento, curiosidade ou guardião.
+_Evitar_: alerta (para o humor), estado
+
+**Fala do Proteca**:
+Versão curta da intervenção, em primeira pessoa e dirigida à turma, feita para ser ouvida.
+
+**Voz do Proteca**:
+Leitura em voz alta da fala do Proteca, disparada pelo professor e nunca automática.
+
+**Tela da turma**:
+Tela aberta pelo código da turma, sem login e sem coleta de dados, em que a turma vê o Proteca e a intervenção enviada pelo professor.
+_Evitar_: tela do aluno, painel do aluno
+
+**Código da turma**:
+Código curto e aleatório de uma sessão que abre a tela da turma enquanto a sessão está aberta.
+_Evitar_: senha
+
+**Orientação de reserva**:
+Leitura do Live gerada por regras fixas quando nenhum modelo de IA respondeu.
+_Evitar_: fallback, mock, resposta falsa

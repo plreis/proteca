@@ -1,6 +1,6 @@
 # ADR 0001 — Stack e hospedagem
 
-- **Status:** aceita
+- **Status:** aceita; banco e frontend substituídos pela ADR 0003
 - **Data:** 18/11/2026
 - **Substitui:** as menções a Vercel, Render e Fly.io no plano anterior
 
