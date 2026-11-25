@@ -3,7 +3,6 @@ from fastapi.testclient import TestClient
 
 from app.auth.middleware import get_current_user
 from app.core.config import settings
-from app.core.dependencies import build_repository, get_memory_repository
 from app.main import app
 from app.schemas.auth import UserPublic, UserRole
 
@@ -24,14 +23,15 @@ def no_real_gemini(monkeypatch):
     monkeypatch.setattr(settings, "GEMINI_API_KEY", None)
 
 
-@pytest.fixture
-def repository():
-    return build_repository(seed=True)
+@pytest.fixture(autouse=True)
+def in_memory_database(monkeypatch):
+    # Cada TestClient sobe a API com um SQLite novo em memória, semeado com a carga inicial.
+    monkeypatch.setattr(settings, "DATABASE_URL", "sqlite://")
+    monkeypatch.setattr(settings, "SEED_DEMO_DATA", True)
 
 
 @pytest.fixture
-def client(repository):
-    app.dependency_overrides[get_memory_repository] = lambda: repository
+def client():
     app.dependency_overrides[get_current_user] = lambda: TEST_PROFESSOR
     with TestClient(app) as test_client:
         yield test_client

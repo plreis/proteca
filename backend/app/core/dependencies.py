@@ -2,24 +2,16 @@ from typing import Annotated
 
 from fastapi import Depends
 
-from app.core.config import settings
-from app.repositories.memory_repo import MemoryRepository
-from app.repositories.seed import load_demo_data
+from app.db import SessionDep
+from app.repositories.sql_repo import SqlRepository
+from app.services.class_screen import ClassVoiceCache
+
+# Voz da tela da turma, em memória e compartilhada pelo processo.
+class_voices = ClassVoiceCache()
 
 
-def build_repository(seed: bool) -> MemoryRepository:
-    repository = MemoryRepository()
-    return load_demo_data(repository) if seed else repository
+def get_repository(session: SessionDep) -> SqlRepository:
+    return SqlRepository(session)
 
 
-_memory_repository = build_repository(settings.SEED_DEMO_DATA)
-
-
-def get_memory_repository() -> MemoryRepository:
-    return _memory_repository
-
-
-MemoryRepositoryDependency = Annotated[
-    MemoryRepository,
-    Depends(get_memory_repository),
-]
+RepositoryDependency = Annotated[SqlRepository, Depends(get_repository)]

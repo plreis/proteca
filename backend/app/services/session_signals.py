@@ -1,7 +1,7 @@
 from collections import Counter
 from datetime import datetime, timezone
 
-from app.repositories.memory_repo import MemoryRepository
+from app.repositories.sql_repo import SqlRepository
 from app.schemas.ai import AILiveGuidanceRequest, LiveFocusSummary
 from app.schemas.incidents import IncidentCategory, IncidentStatus
 from app.schemas.sessions import SessionResponse
@@ -14,7 +14,7 @@ SAFETY_CATEGORIES = {
 
 
 def summarize_session(
-    repository: MemoryRepository,
+    repository: SqlRepository,
     session: SessionResponse,
     now: datetime | None = None,
 ) -> LiveFocusSummary:
@@ -42,7 +42,7 @@ def summarize_session(
 
 
 def build_live_request(
-    repository: MemoryRepository,
+    repository: SqlRepository,
     session: SessionResponse,
 ) -> AILiveGuidanceRequest:
     return AILiveGuidanceRequest(

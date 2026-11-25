@@ -1,6 +1,6 @@
 from fastapi import APIRouter, status
 
-from app.core.dependencies import MemoryRepositoryDependency
+from app.core.dependencies import RepositoryDependency
 from app.schemas.incidents import (
     IncidentCategory,
     IncidentCreate,
@@ -14,7 +14,7 @@ router = APIRouter(prefix="/incidents", tags=["Ocorrências"])
 
 @router.get("", response_model=list[IncidentResponse])
 def list_incidents(
-    repository: MemoryRepositoryDependency,
+    repository: RepositoryDependency,
     session_id: str | None = None,
     category: IncidentCategory | None = None,
     incident_status: IncidentStatus | None = None,
@@ -27,12 +27,12 @@ def list_incidents(
 
 
 @router.post("", response_model=IncidentResponse, status_code=status.HTTP_201_CREATED)
-def create_incident(data: IncidentCreate, repository: MemoryRepositoryDependency):
+def create_incident(data: IncidentCreate, repository: RepositoryDependency):
     return repository.create_incident(data)
 
 
 @router.get("/{incident_id}", response_model=IncidentResponse)
-def get_incident(incident_id: str, repository: MemoryRepositoryDependency):
+def get_incident(incident_id: str, repository: RepositoryDependency):
     return repository.get_incident(incident_id)
 
 
@@ -40,7 +40,7 @@ def get_incident(incident_id: str, repository: MemoryRepositoryDependency):
 def update_incident_status(
     incident_id: str,
     data: IncidentStatusUpdate,
-    repository: MemoryRepositoryDependency,
+    repository: RepositoryDependency,
 ):
     return repository.update_incident_status(
         incident_id=incident_id,

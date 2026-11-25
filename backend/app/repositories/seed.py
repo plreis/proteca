@@ -1,8 +1,11 @@
-"""Dados de demonstração, os mesmos das fixtures do frontend da Sprint 1."""
+"""Dados de demonstração, os mesmos das fixtures do frontend da Sprint 1.
+
+Gravados uma única vez, quando o banco está vazio e SEED_DEMO_DATA=true.
+"""
 
 from datetime import datetime
 
-from app.repositories.memory_repo import MemoryRepository
+from app.repositories.sql_repo import SqlRepository
 from app.schemas.devices import DeviceResponse, DeviceStatus, DeviceType
 from app.schemas.incidents import (
     IncidentActionLog,
@@ -71,8 +74,8 @@ def _incident(
     )
 
 
-def load_demo_data(repository: MemoryRepository) -> MemoryRepository:
-    repository.school = SCHOOL
+def load_demo_data(repository: SqlRepository) -> SqlRepository:
+    repository.add_school(SCHOOL)
 
     for classroom in (
         ClassroomResponse(id="cls-7a", school_id=SCHOOL.id, name="7º Ano A — Manhã", grade="7º Ano"),
@@ -107,6 +110,7 @@ def load_demo_data(repository: MemoryRepository) -> MemoryRepository:
             objective="Pesquisa orientada de Geografia: Biomas Brasileiros e conservação ambiental",
             status=SessionStatus.ABERTA,
             started_at=_dt("2026-11-04T10:15:00Z"),
+            class_code="AULA8B",
             allocated_device_ids=["dev-01", "dev-02"],
             action_log=[
                 SessionActionEntry(
@@ -128,6 +132,7 @@ def load_demo_data(repository: MemoryRepository) -> MemoryRepository:
             objective="Laboratório de Redação: Produção textual dissertativa orientada",
             status=SessionStatus.ENCERRADA,
             started_at=_dt("2026-11-03T14:00:00Z"),
+            class_code="AULA7A",
             ended_at=_dt("2026-11-03T15:40:00Z"),
             allocated_device_ids=["dev-01"],
             closing_justification=(

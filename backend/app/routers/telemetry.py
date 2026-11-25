@@ -1,6 +1,6 @@
 from fastapi import APIRouter, status
 
-from app.core.dependencies import MemoryRepositoryDependency
+from app.core.dependencies import RepositoryDependency
 from app.schemas.telemetry import TelemetryEventCreate, TelemetryEventResponse
 
 router = APIRouter(prefix="/telemetry", tags=["Telemetria"])
@@ -13,14 +13,14 @@ router = APIRouter(prefix="/telemetry", tags=["Telemetria"])
 )
 def create_telemetry_event(
     data: TelemetryEventCreate,
-    repository: MemoryRepositoryDependency,
+    repository: RepositoryDependency,
 ):
     return repository.create_telemetry_event(data)
 
 
 @router.get("", response_model=list[TelemetryEventResponse])
 def list_telemetry_events(
-    repository: MemoryRepositoryDependency,
+    repository: RepositoryDependency,
     session_id: str | None = None,
     device_id: str | None = None,
 ):

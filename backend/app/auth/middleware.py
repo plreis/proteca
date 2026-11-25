@@ -10,10 +10,12 @@ from fastapi.security import OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError
 from pwdlib import PasswordHash
 from pwdlib.exceptions import PwdlibError
+from sqlmodel import Session
 
 from app.auth.users import get_user
 from app.core.config import settings
-from app.schemas.auth import UserInMemory, UserPublic
+from app.db import SessionDep
+from app.schemas.auth import UserInDB, UserPublic
 
 logger = logging.getLogger(__name__)
 
@@ -25,10 +27,11 @@ oauth2_scheme = OAuth2PasswordBearer(
 
 
 def authenticate_user(
+    session: Session,
     username: str,
     password: str,
-) -> UserInMemory | None:
-    user = get_user(username)
+) -> UserInDB | None:
+    user = get_user(session, username)
 
     if user is None:
         return None
@@ -48,7 +51,7 @@ def authenticate_user(
     return user
 
 
-def create_access_token(user: UserInMemory) -> str:
+def create_access_token(user: UserInDB) -> str:
     now = datetime.now(UTC)
     expires_at = now + timedelta(
         minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
@@ -70,6 +73,7 @@ def create_access_token(user: UserInMemory) -> str:
 
 def get_current_user(
     token: Annotated[str, Depends(oauth2_scheme)],
+    session: SessionDep,
 ) -> UserPublic:
     credentials_error = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -91,7 +95,7 @@ def get_current_user(
     except InvalidTokenError:
         raise credentials_error
 
-    user = get_user(username)
+    user = get_user(session, username)
 
     if user is None or user.disabled:
         raise credentials_error

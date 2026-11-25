@@ -1,6 +1,6 @@
 from fastapi import APIRouter, status
 
-from app.core.dependencies import MemoryRepositoryDependency
+from app.core.dependencies import RepositoryDependency
 from app.schemas.devices import (
     DeviceCreate,
     DeviceResponse,
@@ -13,19 +13,19 @@ router = APIRouter(prefix="/devices", tags=["Dispositivos"])
 
 @router.get("", response_model=list[DeviceResponse])
 def list_devices(
-    repository: MemoryRepositoryDependency,
+    repository: RepositoryDependency,
     device_status: DeviceStatus | None = None,
 ):
     return repository.list_devices(status=device_status)
 
 
 @router.post("", response_model=DeviceResponse, status_code=status.HTTP_201_CREATED)
-def create_device(data: DeviceCreate, repository: MemoryRepositoryDependency):
+def create_device(data: DeviceCreate, repository: RepositoryDependency):
     return repository.create_device(data)
 
 
 @router.get("/{device_id}", response_model=DeviceResponse)
-def get_device(device_id: str, repository: MemoryRepositoryDependency):
+def get_device(device_id: str, repository: RepositoryDependency):
     return repository.get_device(device_id)
 
 
@@ -33,6 +33,6 @@ def get_device(device_id: str, repository: MemoryRepositoryDependency):
 def update_device_status(
     device_id: str,
     data: DeviceStatusUpdate,
-    repository: MemoryRepositoryDependency,
+    repository: RepositoryDependency,
 ):
     return repository.update_device_status(device_id, data.status)

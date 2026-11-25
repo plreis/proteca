@@ -70,3 +70,24 @@ def test_filter_sessions_by_status(client):
 
 def test_get_unknown_session_returns_404(client):
     assert client.get("/api/v1/sessions/sess-x").status_code == 404
+
+
+CLASS_CODE_ALPHABET = set("ABCDEFGHJKLMNPQRSTUVWXYZ23456789")
+
+
+def test_demo_sessions_have_fixed_class_codes(client):
+    assert client.get("/api/v1/sessions/sess-01").json()["class_code"] == "AULA8B"
+    assert client.get("/api/v1/sessions/sess-02").json()["class_code"] == "AULA7A"
+
+
+def test_new_session_gets_a_short_unique_class_code(client, open_session):
+    other = client.post(
+        "/api/v1/sessions",
+        json={"classroom_id": "cls-7a", "teacher_name": "Prof. Teste", "objective": OBJECTIVE},
+    ).json()
+
+    codes = [open_session["class_code"], other["class_code"]]
+    for code in codes:
+        assert len(code) == 6
+        assert set(code) <= CLASS_CODE_ALPHABET
+    assert len(set(codes + ["AULA8B", "AULA7A"])) == 4
