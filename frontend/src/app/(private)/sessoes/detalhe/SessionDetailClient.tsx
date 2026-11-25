@@ -8,6 +8,7 @@ import { StatusBadge } from '@/components/StatusBadge';
 import { Modal } from '@/components/Modal';
 import { IncidentList } from '@/features/incidents/IncidentList';
 import { AIDemoCard } from '@/features/sessions/AIDemoCard';
+import { ClassCodeCard } from '@/features/turma/ClassCodeCard';
 import { IncidentForm } from '@/features/incidents/IncidentForm';
 
 interface SessionDetailClientProps {
@@ -202,7 +203,10 @@ export default function SessionDetailClient({ sessionId }: SessionDetailClientPr
         <div className="space-y-6">
           {/* Proteca Live: a API só gera orientação para sessão aberta (encerrada = 409) */}
           {session.status === 'aberta' ? (
-            <AIDemoCard sessionId={session.id} />
+            <>
+              <ClassCodeCard classCode={session.classCode} />
+              <AIDemoCard sessionId={session.id} />
+            </>
           ) : (
             <div className="rounded-lg border border-slate-200 bg-white p-4 text-sm text-slate-600 shadow-sm">
               O Proteca Live fica disponível enquanto a sessão está aberta. Esta sessão já foi encerrada.
