@@ -1,8 +1,8 @@
 name: Deploy Next.js to GitHub Pages
 
+# Só manual: o Pages guarda a versão estática da Sprint 1 (ADR 0001).
+# O site oficial é o do Coolify. Para republicar a Sprint 1: gh workflow run deploy.yml --ref sprint-1
 on:
-  push:
-    branches: ["main"]
   workflow_dispatch:
 
 permissions:
