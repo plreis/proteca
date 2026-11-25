@@ -40,6 +40,8 @@ export interface LessonSession {
   allocatedDeviceIds: string[];
   closingJustification?: string;
   actionLog: SessionActionEntry[];
+  /** Código da turma (6 caracteres) que abre a tela da turma enquanto a sessão está aberta. */
+  classCode?: string;
 }
 
 export type IncidentCategory =
@@ -91,6 +93,8 @@ export interface ProtecaIntervention {
   title: string;
   message: string;
   prompt: string;
+  /** Fala do Proteca: versão curta, em primeira pessoa, feita para ser ouvida. */
+  speech?: string | null;
 }
 
 export interface LiveGuidance {

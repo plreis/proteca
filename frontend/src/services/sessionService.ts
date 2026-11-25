@@ -13,6 +13,7 @@ interface SessionResponse {
     allocated_device_ids: string[];
     closing_justification?: string;
     action_log: SessionActionEntry[];
+    class_code?: string;
 }
 
 export interface CreateSessionDTO {
@@ -35,6 +36,7 @@ function toLessonSession(data: SessionResponse): LessonSession {
         allocatedDeviceIds: data.allocated_device_ids,
         closingJustification: data.closing_justification,
         actionLog: data.action_log,
+        classCode: data.class_code,
     };
 }
 
